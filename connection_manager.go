@@ -60,8 +60,8 @@ func (c *connectionManager) GetConnection() (*gorm.DB, error) {
 
 		c.db.LogMode(c.debugMode)
 
-		c.db.DB().SetMaxIdleConns(0)
-		c.db.DB().SetMaxOpenConns(0)
+		c.db.DB().SetMaxIdleConns(5)
+		c.db.DB().SetMaxOpenConns(-1)
 	}
 
 	// ensure execOnceOnlyFunc() is only ever executed once
