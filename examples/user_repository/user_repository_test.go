@@ -45,8 +45,8 @@ func (s SuiteUserRepository) Test0Insert() {
 	err := s.userRepo.Insert(user)
 
 	s.NoError(err)
-	s.True(user.ID > 0)
-	s.False(user.JoinedOn.IsZero())
+	s.NotEmpty(user.ID)
+	s.NotEmpty(user.JoinedOn)
 }
 
 func (s SuiteUserRepository) Test1GetByEmail() {
