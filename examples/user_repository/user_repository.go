@@ -14,6 +14,7 @@ type User struct {
 	JoinedOn    time.Time
 }
 
+// perform some pre-insert operation
 func (u *User) BeforeCreate() error {
 	if u.JoinedOn.IsZero() {
 		u.JoinedOn = time.Now().UTC()
@@ -22,6 +23,7 @@ func (u *User) BeforeCreate() error {
 	return nil
 }
 
+// Always prefer interfaces when possible
 type UserRepository interface {
 	Insert(user *User) error
 	GetByEmail(email string) (*User, error)
