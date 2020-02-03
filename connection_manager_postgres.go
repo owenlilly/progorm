@@ -2,8 +2,8 @@ package progorm
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/lib/pq"
@@ -50,18 +50,21 @@ func MakePostgresConnString(user, pass, host, dbName, sslMode string, defaultsDB
 
 // Creates postgres database of the given name if one doesn't already exists.
 // No actions are performed if the database already exists.
-func PGCreateDbIfNotExists(user, pass, host, name, sslMode string, defaultDB ...string) error {
-	if defaultDB != nil && len(defaultDB) > 0 {
-		if name == defaultDB[0] {
+func PGCreateDbIfNotExists(connString string, defaultDBs ...string) error {
+	var defaultDB string
+	if defaultDBs != nil && len(defaultDBs) > 0 {
+		if defaultDB == defaultDBs[0] {
 			return nil
 		}
-	} else if name == "" {
-		return errors.New("database name is required")
+	} else {
+		defaultDB = "postgres"
 	}
 
-	var connStr = MakePostgresConnString(user, pass, host, "", sslMode, defaultDB...)
+	re := regexp.MustCompile(`(?m)postgres://.+:?\d?/(\w+)`)
+	dbName := re.FindStringSubmatch(connString)[1]
+	connStrWithDefaultDB := strings.Replace(connString, dbName, defaultDB, 1)
 
-	db, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("postgres", connStrWithDefaultDB)
 	if err != nil {
 		return err
 	}
@@ -69,7 +72,7 @@ func PGCreateDbIfNotExists(user, pass, host, name, sslMode string, defaultDB ...
 		_ = db.Close()
 	}()
 
-	_, err = db.Exec("CREATE DATABASE " + name)
+	_, err = db.Exec("CREATE DATABASE " + dbName)
 	if err != nil {
 		switch e := err.(type) {
 		case *pq.Error:
