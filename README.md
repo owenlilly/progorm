@@ -1,4 +1,6 @@
 [![go report card](https://goreportcard.com/badge/github.com/owenlilly/progorm "go report card")](https://goreportcard.com/report/github.com/owenlilly/progorm)
+[![GoDoc](https://godoc.org/github.com/owenlilly/progorm?status.svg)](https://godoc.org/github.com/owenlilly/progorm)
+[![MIT license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
 
 # Installation
 
