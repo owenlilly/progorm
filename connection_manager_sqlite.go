@@ -16,6 +16,7 @@ type sqliteConnectionManager struct {
 	connString string
 }
 
+// Creates an instance of the SQLite implementation of the ConnectionManager interface.
 func NewSQLiteConnectionManager(dbname string, debugMode bool) ConnectionManager {
 	m := &sqliteConnectionManager{
 		connString: dbname,

@@ -45,7 +45,7 @@ func newConnectionManager(dialect, connString string, debugMode bool) connection
 }
 
 func (c *connectionManager) GetConnection() (*gorm.DB, error) {
-	var err error = nil
+	var err error
 
 	// this func should be once executed and only once,
 	// even if GetConnection() is called multiple times
