@@ -1,3 +1,5 @@
+[![go report card](https://goreportcard.com/badge/github.com/owenlilly/progorm "go report card")](https://goreportcard.com/report/github.com/owenlilly/progorm)
+
 # Installation
 
 Run `go get -u github.com/owenlilly/progorm`.
