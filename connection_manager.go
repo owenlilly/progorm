@@ -18,6 +18,9 @@ type (
 	ConnectionManager interface {
 		GetConnection() (*gorm.DB, error)
 		AutoMigrate(values ...interface{}) error
+		Debug() bool
+		Dialect() string
+		ConnString() string
 	}
 
 	// implements ConnectionManager interface
@@ -31,8 +34,8 @@ type (
 	}
 )
 
-func newConnectionManager(dialect, connString string, debugMode bool) connectionManager {
-	connMan := connectionManager{
+func newConnectionManager(dialect, connString string, debugMode bool) ConnectionManager {
+	connMan := &connectionManager{
 		dialect:        dialect,
 		once:           sync.Once{},
 		debugMode:      debugMode,
@@ -84,4 +87,16 @@ func (c *connectionManager) AutoMigrate(tables ...interface{}) error {
 	}
 
 	return c.db.AutoMigrate(unmigratedTables...).Error
+}
+
+func (c *connectionManager) Debug() bool {
+	return c.debugMode
+}
+
+func (c *connectionManager) Dialect() string {
+	return c.dialect
+}
+
+func (c *connectionManager) ConnString() string {
+	return c.connString
 }

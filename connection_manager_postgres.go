@@ -10,13 +10,13 @@ import (
 )
 
 type postgresConnectionManager struct {
-	connectionManager
+	ConnectionManager
 }
 
 // Creates a new instance of the Postgres implementation of the ConnectionManager interface.
 func NewPostgresConnectionManager(connString string, debugMode bool) ConnectionManager {
 	connMan := &postgresConnectionManager{
-		connectionManager: newConnectionManager("postgres", connString, debugMode),
+		ConnectionManager: newConnectionManager("postgres", connString, debugMode),
 	}
 
 	return connMan
