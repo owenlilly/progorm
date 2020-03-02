@@ -4,7 +4,6 @@ import (
 	"errors"
 	"reflect"
 	"sync"
-	"time"
 
 	"github.com/jinzhu/gorm"
 )
@@ -50,11 +49,6 @@ func (c *connectionManager) GetConnection() (*gorm.DB, error) {
 	// this func should be once executed and only once,
 	// even if GetConnection() is called multiple times
 	execOnceOnlyFunc := func() {
-		// we'll default to UTC time for created at
-		gorm.NowFunc = func() time.Time {
-			return time.Now().UTC()
-		}
-
 		c.db, err = gorm.Open(c.dialect, c.connString)
 		if err != nil {
 			return
