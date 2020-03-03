@@ -2,6 +2,7 @@ package progorm
 
 import (
 	"errors"
+	"log"
 	"reflect"
 	"sync"
 
@@ -17,7 +18,8 @@ type (
 	// Manages database connections
 	ConnectionManager interface {
 		GetConnection() (*gorm.DB, error)
-		AutoMigrate(values ...interface{}) error
+		AutoMigrate(tables ...interface{}) error
+		AutoMigrateOrWarn(tables ...interface{})
 		Debug() bool
 		Dialect() string
 		ConnString() string
@@ -87,6 +89,12 @@ func (c *connectionManager) AutoMigrate(tables ...interface{}) error {
 	}
 
 	return c.db.AutoMigrate(unmigratedTables...).Error
+}
+
+func (c *connectionManager) AutoMigrateOrWarn(tables ...interface{}) {
+	if err := c.AutoMigrate(tables...); err != nil {
+		log.Printf("%v\n", err)
+	}
 }
 
 func (c *connectionManager) Debug() bool {
