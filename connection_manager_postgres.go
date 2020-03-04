@@ -57,6 +57,7 @@ func PGCreateDbIfNotExists(connString string, defaultDBs ...string) error {
 		if defaultDB == defaultDBs[0] {
 			return nil
 		}
+		defaultDB = defaultDBs[0]
 	} else {
 		defaultDB = "postgres"
 	}
