@@ -52,14 +52,11 @@ func MakePostgresConnString(user, pass, host, dbName, sslMode string, defaultsDB
 
 // Creates postgres database of the given name if one doesn't already exists. No actions are performed if the database already exists.
 func PGCreateDbIfNotExists(connString string, defaultDBs ...string) error {
-	var defaultDB string
+	var defaultDB = "postgres"
 	if defaultDBs != nil && len(defaultDBs) > 0 {
 		if defaultDB == defaultDBs[0] {
 			return nil
 		}
-		defaultDB = defaultDBs[0]
-	} else {
-		defaultDB = "postgres"
 	}
 
 	re := regexp.MustCompile(`(?m)postgres://.+:?\d?/(\w+)`)
