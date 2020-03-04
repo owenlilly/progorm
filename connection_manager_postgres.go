@@ -54,9 +54,7 @@ func MakePostgresConnString(user, pass, host, dbName, sslMode string, defaultsDB
 func PGCreateDbIfNotExists(connString string, defaultDBs ...string) error {
 	var defaultDB = "postgres"
 	if defaultDBs != nil && len(defaultDBs) > 0 {
-		if defaultDB == defaultDBs[0] {
-			return nil
-		}
+		defaultDB = defaultDBs[0]
 	}
 
 	re := regexp.MustCompile(`(?m)postgres://.+:?\d?/(\w+)`)
@@ -65,6 +63,11 @@ func PGCreateDbIfNotExists(connString string, defaultDBs ...string) error {
 		return ErrInvalidConnectionString
 	}
 	dbName := matches[1]
+	if dbName == defaultDB {
+		// no need to create anything, database
+		// should already exist since it's the default
+		return nil
+	}
 	connStrWithDefaultDB := strings.Replace(connString, dbName, defaultDB, 1)
 
 	db, err := sql.Open("postgres", connStrWithDefaultDB)
