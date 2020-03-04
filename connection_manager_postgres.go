@@ -62,7 +62,11 @@ func PGCreateDbIfNotExists(connString string, defaultDBs ...string) error {
 	}
 
 	re := regexp.MustCompile(`(?m)postgres://.+:?\d?/(\w+)`)
-	dbName := re.FindStringSubmatch(connString)[1]
+	matches := re.FindStringSubmatch(connString)
+	if len(matches) != 2 {
+		return ErrInvalidConnectionString
+	}
+	dbName := matches[1]
 	connStrWithDefaultDB := strings.Replace(connString, dbName, defaultDB, 1)
 
 	db, err := sql.Open("postgres", connStrWithDefaultDB)

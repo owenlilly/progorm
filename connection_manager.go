@@ -12,6 +12,8 @@ import (
 var (
 	// Returned if database connection isn't open
 	ErrConnectionClosed = errors.New("db connection closed")
+
+	ErrInvalidConnectionString = errors.New("invalid connection string")
 )
 
 type (
