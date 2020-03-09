@@ -47,6 +47,9 @@ func newConnectionManager(dialect, connString string, debugMode bool) Connection
 		migratedTables: make(map[reflect.Type]bool),
 	}
 
+	// open database connection
+	_, _ = connMan.GetConnection()
+
 	return connMan
 }
 
