@@ -2,7 +2,6 @@ package progorm
 
 import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 const sqLiteDialect = "sqlite3"

@@ -39,6 +39,7 @@ type (
 )
 
 func newConnectionManager(dialect, connString string, debugMode bool) ConnectionManager {
+
 	connMan := &connectionManager{
 		dialect:        dialect,
 		once:           sync.Once{},
