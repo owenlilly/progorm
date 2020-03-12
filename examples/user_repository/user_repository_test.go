@@ -3,6 +3,7 @@ package user_repository
 import (
 	"testing"
 
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/owenlilly/progorm"
 	"github.com/stretchr/testify/suite"
 )
