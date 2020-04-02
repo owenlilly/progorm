@@ -32,6 +32,12 @@ func (r BaseRepository) InsertRecord(model interface{}) error {
 	return r.db.Create(model).Error
 }
 
+func (r BaseRepository) Count(model, query interface{}, args ...interface{}) (count int64, err error) {
+	err = r.db.Model(model).Where(query, args...).Count(&count).Error
+
+	return
+}
+
 // Create tables for the given models or return an error
 func (r BaseRepository) AutoMigrate(models ...interface{}) error {
 	return r.connMan.AutoMigrate(models...)
