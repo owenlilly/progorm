@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/jinzhu/gorm"
+	"github.com/vcraescu/go-paginator"
+	"github.com/vcraescu/go-paginator/adapter"
 )
 
 // Contains information about database connection and methods to access data, should be extended by more specific repository types.
@@ -30,6 +32,22 @@ func NewBaseRepository(connMan ConnectionManager) BaseRepository {
 // Model to insert must be a pointer/reference type
 func (r BaseRepository) InsertRecord(model interface{}) error {
 	return r.db.Create(model).Error
+}
+
+func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out interface{}) (Page, error) {
+	resultPage := Page{PerPage: perPage}
+
+	p := paginator.New(adapter.NewGORMAdapter(query), int(perPage))
+	p.SetPage(int(page))
+	if err := p.Results(out); err != nil {
+		return resultPage, err
+	}
+
+	resultPage.Pages = uint(p.PageNums())
+	resultPage.Total = uint(p.Nums())
+	resultPage.Page = uint(p.Page())
+
+	return resultPage, nil
 }
 
 func (r BaseRepository) Count(model, query interface{}, args ...interface{}) (count int64, err error) {

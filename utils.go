@@ -9,6 +9,20 @@ var (
 	ErrUnsupportedDatabase = errors.New("unsupported database")
 )
 
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 // Returns a ConnectionManager implementation for the provided connection string.  Will return
 // 'ErrUnsupportedDatabase' error if an unsupported connection string is provided.  It will
 // also attempt to create a database of the given if one doesn't already exists.
