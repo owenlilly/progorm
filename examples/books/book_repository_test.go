@@ -51,10 +51,6 @@ func (s SuiteBookRepository) TestInsert() {
 	})
 	s.NotEqual(0, id2)
 	s.NoError(err)
-
-	page, err := s.repo.FindAll(0, 10)
-	s.NoError(err)
-	s.NotEmpty(page)
 }
 
 func (s SuiteBookRepository) TestFindAll() {
