@@ -1,12 +1,15 @@
 package books
 
 import (
+	"log"
+	"os"
 	"testing"
 	"time"
 
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/owenlilly/progorm"
 	"github.com/stretchr/testify/suite"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type SuiteBookRepository struct {
@@ -22,7 +25,16 @@ func TestUserRepository(t *testing.T) {
 
 func (s *SuiteBookRepository) SetupSuite() {
 	// create a new SQL connection manager, there's also a postgres connection manager
-	s.connMan = progorm.NewSQLiteConnectionManager("test.db", true)
+	s.connMan = progorm.NewSQLiteConnectionManager("test.db", &gorm.Config{
+		Logger: logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+			logger.Config{
+				SlowThreshold: time.Second, // Slow SQL threshold
+				LogLevel:      logger.Info, // Log level
+				Colorful:      true,        // Disable color
+			},
+		),
+	})
 
 	s.repo = NewBookRepository(s.connMan)
 }
@@ -31,7 +43,7 @@ func (s *SuiteBookRepository) TearDownSuite() {
 	db, _ := s.connMan.GetConnection()
 
 	// clear all records
-	db.Delete(&Book{})
+	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&Book{})
 }
 
 func (s SuiteBookRepository) TestInsert() {
