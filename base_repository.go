@@ -2,10 +2,10 @@ package progorm
 
 import (
 	"log"
+	"math"
 
-	"github.com/jinzhu/gorm"
-	"github.com/vcraescu/go-paginator"
-	"github.com/vcraescu/go-paginator/adapter"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // Contains information about database connection and methods to access data, should be extended by more specific repository types.
@@ -35,19 +35,56 @@ func (r BaseRepository) InsertRecord(model interface{}) error {
 }
 
 func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out interface{}) (Page, error) {
-	resultPage := Page{PerPage: perPage}
-
-	p := paginator.New(adapter.NewGORMAdapter(query), int(perPage))
-	p.SetPage(int(page))
-	if err := p.Results(out); err != nil {
-		return resultPage, err
+	if perPage > 1000 {
+		// cap at 10000 records per call
+		perPage = 1000
 	}
 
-	resultPage.Pages = uint(p.PageNums())
-	resultPage.Total = uint(p.Nums())
-	resultPage.Page = uint(p.Page())
+	if page == 0 {
+		// 1 based page index
+		page = 1
+	}
 
-	return resultPage, nil
+	results := Page{
+		PerPage: perPage,
+		Page:    page,
+	}
+
+	session := query.Session(&gorm.Session{
+		DryRun:         true,
+		WithConditions: true,
+		Logger: logger.New(nil, logger.Config{
+			LogLevel: logger.Silent,
+		}),
+	})
+
+	var total int64
+	countStmt := session.Count(&total).Statement
+	countSqlStr := countStmt.SQL.String()
+	countArgs := countStmt.Vars
+
+	err := r.db.Raw(countSqlStr, countArgs...).Count(&total).Error
+	if err != nil {
+		return results, err
+	}
+
+	queryStmt := session.
+		Offset(int(page - 1*perPage)).
+		Limit(int(perPage)).
+		Find(nil).Statement
+
+	sqlStr := queryStmt.SQL.String()
+	vars := queryStmt.Vars
+
+	err = r.db.Raw(sqlStr, vars...).Scan(out).Error
+	if err != nil {
+		return results, err
+	}
+
+	results.Total = uint(total)
+	results.Pages = r.calcPageCount(uint64(results.PerPage), uint64(results.Total))
+
+	return results, nil
 }
 
 func (r BaseRepository) Count(model, query interface{}, args ...interface{}) (count int64, err error) {
@@ -76,4 +113,11 @@ func (r BaseRepository) ConnectionManager() ConnectionManager {
 // Returns a struct contain gorm database connection information
 func (r BaseRepository) DB() *gorm.DB {
 	return r.db
+}
+
+func (r BaseRepository) calcPageCount(perPage, total uint64) uint {
+	if perPage == 0 || total == 0 {
+		return 0
+	}
+	return uint(math.Ceil(float64(total) / float64(perPage)))
 }

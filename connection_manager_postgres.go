@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type postgresConnectionManager struct {
@@ -14,9 +16,10 @@ type postgresConnectionManager struct {
 }
 
 // Creates a new instance of the Postgres implementation of the ConnectionManager interface.
-func NewPostgresConnectionManager(connString string, debugMode bool) ConnectionManager {
+func NewPostgresConnectionManager(connString string, config *gorm.Config) ConnectionManager {
+	dialector := postgres.Open(connString)
 	connMan := &postgresConnectionManager{
-		ConnectionManager: newConnectionManager("postgres", connString, debugMode),
+		ConnectionManager: newConnectionManager(dialector, config),
 	}
 
 	return connMan

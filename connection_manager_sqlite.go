@@ -1,16 +1,20 @@
 package progorm
 
-const sqLiteDialect = "sqlite3"
+import (
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+)
 
 type sqliteConnectionManager struct {
 	ConnectionManager
 }
 
-// Creates an instance of the SQLite implementation of the ConnectionManager interface.
+// NewSQLiteConnectionManager creates an instance of the SQLite implementation of the ConnectionManager interface.
 // Be sure to 'import _ "github.com/jinzhu/gorm/dialects/sqlite"' package in order to run successfully
-func NewSQLiteConnectionManager(dbname string, debugMode bool) ConnectionManager {
+func NewSQLiteConnectionManager(dbname string, config *gorm.Config) ConnectionManager {
+	dialector := sqlite.Open(dbname)
 	m := &sqliteConnectionManager{
-		ConnectionManager: newConnectionManager(sqLiteDialect, dbname, debugMode),
+		ConnectionManager: newConnectionManager(dialector, config),
 	}
 
 	return m
