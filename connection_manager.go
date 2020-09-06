@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	// Returned if database connection isn't open
+	// ErrConnectionClosed returned if database connection isn't open
 	ErrConnectionClosed = errors.New("db connection closed")
 
+	// ErrInvalidConnectionString returned if database is connection string is malformed/invalid
 	ErrInvalidConnectionString = errors.New("invalid connection string")
 )
 
@@ -70,6 +71,7 @@ func newConnectionManager(dialector gorm.Dialector, config *gorm.Config) Connect
 	return connMan
 }
 
+// GetConnection get current *gorm.DB connection
 func (c *connectionManager) GetConnection() (*gorm.DB, error) {
 	var err error
 
@@ -96,13 +98,13 @@ func (c *connectionManager) GetConnection() (*gorm.DB, error) {
 	return c.db, err
 }
 
+// AutoMigrate create/change database table definition based on the given models
 func (c *connectionManager) AutoMigrate(tables ...interface{}) error {
 	if c.db == nil {
 		return ErrConnectionClosed
 	}
 
 	var unmigratedTables []interface{}
-
 	for _, table := range tables {
 		t := reflect.ValueOf(table).Type()
 		if !c.migratedTables[t] {
@@ -116,16 +118,19 @@ func (c *connectionManager) AutoMigrate(tables ...interface{}) error {
 	return c.db.AutoMigrate(unmigratedTables...)
 }
 
+// AutoMigrateOrWarn same as AutoMigrate but prints a log instead of returning an error
 func (c *connectionManager) AutoMigrateOrWarn(tables ...interface{}) {
 	if err := c.AutoMigrate(tables...); err != nil {
 		log.Printf("%v\n", err)
 	}
 }
 
+// Dialect return the current database dialect
 func (c *connectionManager) Dialect() string {
 	return c.config.Name()
 }
 
+// ConnString return the connection string for the current database
 func (c *connectionManager) ConnString() string {
 	return c.connStr
 }

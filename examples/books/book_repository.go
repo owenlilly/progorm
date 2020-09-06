@@ -6,16 +6,16 @@ import (
 	"github.com/owenlilly/progorm"
 )
 
-// Represents `public`.`books` table in database
+// Book books table model
 type Book struct {
-	ID          uint   `gorm:"primary_key"`
+	ID          uint   `gorm:"primaryKey"`
 	Author      string `gorm:"size:128"`
 	Title       string `gorm:"size:256"`
 	ReleaseDate *time.Time
 	ISBN        string `gorm:"size:32"`
 }
 
-// FindRecords all result set
+// Paged holds a page of results
 type Paged struct {
 	Page    uint   `json:"page"`
 	PerPage uint   `json:"per_page"`
@@ -24,7 +24,7 @@ type Paged struct {
 	Books   []Book `json:"books"`
 }
 
-// Using an interface makes mocking easier
+// BookRepository repository interface for accessing books table
 type BookRepository interface {
 	Insert(book Book) (id uint, err error)
 	FindAll(page, perPage uint) (Paged, error)
@@ -34,7 +34,7 @@ type bookRepository struct {
 	progorm.BaseRepository
 }
 
-// Create a new instance of BookRepository
+// NewBookRepository create a new instance of BookRepository
 func NewBookRepository(connMan progorm.ConnectionManager) BookRepository {
 	repo := bookRepository{
 		BaseRepository: progorm.NewBaseRepository(connMan),
@@ -46,7 +46,7 @@ func NewBookRepository(connMan progorm.ConnectionManager) BookRepository {
 	return &repo
 }
 
-// Insert a new book
+// Insert insert a new book
 func (r bookRepository) Insert(book Book) (id uint, err error) {
 	// do some validations on book
 	if err = r.InsertRecord(&book); err != nil {
@@ -55,7 +55,7 @@ func (r bookRepository) Insert(book Book) (id uint, err error) {
 	return book.ID, nil
 }
 
-// Find all books and page results
+// FindAll find books in paged results
 func (r bookRepository) FindAll(page, perPage uint) (Paged, error) {
 	result := Paged{PerPage: perPage}
 

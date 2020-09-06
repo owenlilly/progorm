@@ -8,13 +8,13 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-// Contains information about database connection and methods to access data, should be extended by more specific repository types.
+// BaseRepository base repository type for accessing tables
 type BaseRepository struct {
 	connMan ConnectionManager
 	db      *gorm.DB
 }
 
-// Instantiate new instance of BaseRepository
+// NewBaseRepository instantiate new instance of BaseRepository
 func NewBaseRepository(connMan ConnectionManager) BaseRepository {
 	r := BaseRepository{
 		connMan: connMan,
@@ -29,11 +29,12 @@ func NewBaseRepository(connMan ConnectionManager) BaseRepository {
 	return r
 }
 
-// Model to insert must be a pointer/reference type
+// InsertRecord model to insert must be a pointer/reference type
 func (r BaseRepository) InsertRecord(model interface{}) error {
 	return r.db.Create(model).Error
 }
 
+// FindRecords page finding records
 func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out interface{}) (Page, error) {
 	if perPage > 1000 {
 		// cap at 10000 records per call
@@ -87,30 +88,31 @@ func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out inte
 	return results, nil
 }
 
+// Count count total number of records for the given query
 func (r BaseRepository) Count(model, query interface{}, args ...interface{}) (count int64, err error) {
 	err = r.db.Model(model).Where(query, args...).Count(&count).Error
 
 	return
 }
 
-// Create tables for the given models or return an error
+// AutoMigrate create tables for the given models or return an error
 func (r BaseRepository) AutoMigrate(models ...interface{}) error {
 	return r.connMan.AutoMigrate(models...)
 }
 
-// Create tables for the given models or print a warning message if there's an error
+// AutoMigrateOrWarn create tables for the given models or print a warning message if there's an error
 func (r BaseRepository) AutoMigrateOrWarn(models ...interface{}) {
 	if err := r.connMan.AutoMigrate(models...); err != nil {
 		log.Println("warning:", err.Error())
 	}
 }
 
-// Return the ConnectionManager
+// ConnectionManager return the current ConnectionManager
 func (r BaseRepository) ConnectionManager() ConnectionManager {
 	return r.connMan
 }
 
-// Returns a struct contain gorm database connection information
+// DB return a struct contain gorm database connection information
 func (r BaseRepository) DB() *gorm.DB {
 	return r.db
 }

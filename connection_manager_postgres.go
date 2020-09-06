@@ -15,7 +15,7 @@ type postgresConnectionManager struct {
 	ConnectionManager
 }
 
-// Creates a new instance of the Postgres implementation of the ConnectionManager interface.
+// NewPostgresConnectionManager create a new instance of the Postgres implementation of the ConnectionManager interface.
 func NewPostgresConnectionManager(connString string, config *gorm.Config) ConnectionManager {
 	dialector := postgres.Open(connString)
 	connMan := &postgresConnectionManager{
@@ -25,7 +25,7 @@ func NewPostgresConnectionManager(connString string, config *gorm.Config) Connec
 	return connMan
 }
 
-// Builds Postgres connection string from individual credential parts
+// MakePostgresConnString build Postgres connection string from individual credential parts
 func MakePostgresConnString(user, pass, host, dbName, sslMode string, defaultsDBs ...string) string {
 	var connStr = "postgres://"
 
@@ -53,7 +53,7 @@ func MakePostgresConnString(user, pass, host, dbName, sslMode string, defaultsDB
 	return connStr
 }
 
-// Creates postgres database of the given name if one doesn't already exists. No actions are performed if the database already exists.
+// PGCreateDbIfNotExists create postgres database of the given name if one doesn't already exists. No actions are performed if the database already exists.
 func PGCreateDbIfNotExists(connString string, defaultDBs ...string) error {
 	var defaultDB = "postgres"
 	if defaultDBs != nil && len(defaultDBs) > 0 {
