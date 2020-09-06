@@ -25,7 +25,7 @@ func (u *User) BeforeCreate(*gorm.DB) error {
 	return nil
 }
 
-// UserRepository repository interface for accessing books table
+// UserRepository repository interface for accessing users table
 type UserRepository interface {
 	Insert(user *User) error
 	GetByEmail(email string) (*User, error)
