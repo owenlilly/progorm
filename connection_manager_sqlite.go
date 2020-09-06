@@ -13,7 +13,7 @@ type sqliteConnectionManager struct {
 func NewSQLiteConnectionManager(dbname string, config *gorm.Config) ConnectionManager {
 	dialector := sqlite.Open(dbname)
 	m := &sqliteConnectionManager{
-		ConnectionManager: newConnectionManager(dialector, config),
+		ConnectionManager: newConnectionManager(dbname, dialector, config),
 	}
 
 	return m

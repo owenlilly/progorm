@@ -19,7 +19,7 @@ type postgresConnectionManager struct {
 func NewPostgresConnectionManager(connString string, config *gorm.Config) ConnectionManager {
 	dialector := postgres.Open(connString)
 	connMan := &postgresConnectionManager{
-		ConnectionManager: newConnectionManager(dialector, config),
+		ConnectionManager: newConnectionManager(connString, dialector, config),
 	}
 
 	return connMan
