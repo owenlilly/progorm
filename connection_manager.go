@@ -42,12 +42,13 @@ type (
 	}
 )
 
-func newConnectionManager(dialector gorm.Dialector, config *gorm.Config) ConnectionManager {
+func newConnectionManager(connStr string, dialector gorm.Dialector, config *gorm.Config) ConnectionManager {
 	connMan := &connectionManager{
 		dialector:      dialector,
 		config:         config,
 		once:           sync.Once{},
 		migratedTables: make(map[reflect.Type]bool),
+		connStr:        connStr,
 	}
 
 	if connMan.config == nil {
