@@ -52,8 +52,7 @@ func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out inte
 	}
 
 	session := query.Session(&gorm.Session{
-		DryRun:         true,
-		WithConditions: true,
+		DryRun: true,
 		Logger: logger.New(nil, logger.Config{
 			LogLevel: logger.Silent,
 		}),
