@@ -8,6 +8,7 @@ import (
 
 	"github.com/owenlilly/progorm"
 	"github.com/stretchr/testify/suite"
+	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -51,7 +52,7 @@ func (s SuiteBookRepository) TestInsert() {
 	id1, err := s.repo.Insert(Book{
 		Title:       "Game Of Thrones",
 		ReleaseDate: &now,
-		ISBN:        "978-3-18-148410-0",
+		ISBN:        null.StringFrom("978-3-18-148410-0"),
 	})
 	s.NotEqual(0, id1)
 	s.NoError(err)
@@ -59,7 +60,7 @@ func (s SuiteBookRepository) TestInsert() {
 	id2, err := s.repo.Insert(Book{
 		Title:       "Beowulf",
 		ReleaseDate: &now,
-		ISBN:        "978-3-16-148410-0",
+		ISBN:        null.StringFrom("978-3-16-148410-0"),
 	})
 	s.NotEqual(0, id2)
 	s.NoError(err)
@@ -85,7 +86,7 @@ func (s SuiteBookRepository) givenBooksExist() {
 		Author:      "George RR Martin",
 		Title:       "Game Of Thrones",
 		ReleaseDate: &now,
-		ISBN:        "978-3-18-148410-0",
+		ISBN:        null.StringFrom("978-3-18-148410-0"),
 	})
 	s.NotEqual(0, id1)
 	s.NoError(err)

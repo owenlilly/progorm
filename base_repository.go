@@ -3,6 +3,7 @@ package progorm
 import (
 	"log"
 	"math"
+	"regexp"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -59,10 +60,7 @@ func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out inte
 	})
 
 	var total int64
-	countStmt := session.Count(&total).Statement
-	countSqlStr := countStmt.SQL.String()
-	countArgs := countStmt.Vars
-
+	countSqlStr, countArgs := r.buildCountSql(session)
 	err := r.db.Raw(countSqlStr, countArgs...).Count(&total).Error
 	if err != nil {
 		return results, err
@@ -73,7 +71,8 @@ func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out inte
 		Limit(int(perPage)).
 		Find(nil).Statement
 
-	sqlStr := queryStmt.SQL.String()
+	// for Postgresql, db.Raw() expects '?' as placeholders so replace '$1' placeholders with '?'
+	sqlStr := r.replaceNumericPlaceholders(queryStmt.SQL.String())
 	vars := queryStmt.Vars
 
 	err = r.db.Raw(sqlStr, vars...).Scan(out).Error
@@ -121,4 +120,29 @@ func (r BaseRepository) calcPageCount(perPage, total uint64) uint {
 		return 0
 	}
 	return uint(math.Ceil(float64(total) / float64(perPage)))
+}
+
+func (r BaseRepository) buildCountSql(db *gorm.DB) (countSql string, vars []interface{}) {
+	if orderByClause, ok := db.Statement.Clauses["ORDER BY"]; ok {
+		if _, ok := db.Statement.Clauses["GROUP BY"]; !ok {
+			delete(db.Statement.Clauses, "ORDER BY")
+			defer func() {
+				db.Statement.Clauses["ORDER BY"] = orderByClause
+			}()
+		}
+	}
+	var count int64
+	countStmt := db.Count(&count).Statement
+
+	// for Postgresql, db.Raw() expects '?' as placeholders so replace '$1' placeholders with '?'
+	countSql = r.replaceNumericPlaceholders(countStmt.SQL.String())
+	vars = countStmt.Vars
+
+	return
+}
+
+func (r BaseRepository) replaceNumericPlaceholders(sqlStr string) string {
+	var numericPlaceholder = regexp.MustCompile("\\$(\\d+)")
+
+	return numericPlaceholder.ReplaceAllString(sqlStr, "?")
 }

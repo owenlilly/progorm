@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/owenlilly/progorm"
+	"gopkg.in/guregu/null.v4"
 )
 
 // Book books table model
@@ -12,7 +13,7 @@ type Book struct {
 	Author      string `gorm:"size:128"`
 	Title       string `gorm:"size:256"`
 	ReleaseDate *time.Time
-	ISBN        string `gorm:"size:32"`
+	ISBN        null.String `gorm:"size:32"`
 }
 
 // Paged holds a page of results
@@ -28,6 +29,7 @@ type Paged struct {
 type BookRepository interface {
 	Insert(book Book) (id uint, err error)
 	FindAll(page, perPage uint) (Paged, error)
+	FindByTitle(title string, page, perPage uint) (Paged, error)
 }
 
 type bookRepository struct {
@@ -61,6 +63,27 @@ func (r bookRepository) FindAll(page, perPage uint) (Paged, error) {
 
 	query := r.DB().
 		Model(Book{}).
+		Order("title ASC")
+
+	pageInfo, err := r.FindRecords(page, perPage, query, &result.Books)
+	if err != nil {
+		return result, err
+	}
+
+	result.Page = pageInfo.Page
+	result.Total = pageInfo.Total
+	result.Pages = pageInfo.Pages
+
+	return result, nil
+}
+
+// FindAll find books in paged results
+func (r bookRepository) FindByTitle(title string, page, perPage uint) (Paged, error) {
+	result := Paged{PerPage: perPage}
+
+	query := r.DB().
+		Model(Book{}).
+		Where(Book{ISBN: null.StringFrom(title)}).
 		Order("title ASC")
 
 	pageInfo, err := r.FindRecords(page, perPage, query, &result.Books)
