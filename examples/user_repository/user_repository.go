@@ -53,8 +53,11 @@ func (r userRepository) Insert(user *User) error {
 func (r userRepository) GetByEmail(email string) (*User, error) {
 	var user User
 	result := r.DB().First(&user, User{Email: email})
-	if result.RowsAffected == 0 {
-		return nil, errors.New("user not found")
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, errors.New("user not found")
+		}
+		return nil, result.Error
 	}
 
 	return &user, nil
