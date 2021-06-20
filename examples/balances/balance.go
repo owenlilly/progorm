@@ -63,7 +63,7 @@ func (r balanceRepository) GetBalance(balanceID string) (*Balance, error) {
 // region: Transaction section
 
 func (r *balanceRepository) Begin(opts ...*sql.TxOptions) (tx *gorm.DB) {
-	return r.BaseRepository.BeginTx(opts...).DB()
+	return r.DB().Begin(opts...)
 }
 
 func (r *balanceRepository) WithTx(tx *gorm.DB) BalanceRepository {

@@ -1,18 +1,12 @@
 package progorm
 
 import (
-	"database/sql"
-	"errors"
 	"log"
 	"math"
 	"regexp"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-)
-
-var (
-	ErrNotInTransaction = errors.New("not in transaction")
 )
 
 // BaseRepository base repository type for accessing tables
@@ -124,15 +118,6 @@ func (r BaseRepository) DB() *gorm.DB {
 
 // region: Transaction section
 
-// BeginTx start a new database transaction
-func (r BaseRepository) BeginTx(opts ...*sql.TxOptions) BaseRepository {
-	return BaseRepository{
-		connMan: r.connMan,
-		db:      r.db.Begin(opts...),
-		inTx:    true,
-	}
-}
-
 // WithTx start a new database transaction
 func (r BaseRepository) WithTx(tx *gorm.DB) BaseRepository {
 	return BaseRepository{
@@ -143,42 +128,18 @@ func (r BaseRepository) WithTx(tx *gorm.DB) BaseRepository {
 }
 
 func (r *BaseRepository) SavePoint(name string) error {
-	defer func() {
-		r.inTx = false
-	}()
-	if !r.inTx {
-		return ErrNotInTransaction
-	}
 	return r.db.SavePoint(name).Error
 }
 
 func (r BaseRepository) Commit() error {
-	defer func() {
-		r.inTx = false
-	}()
-	if !r.inTx {
-		return ErrNotInTransaction
-	}
 	return r.db.Commit().Error
 }
 
 func (r BaseRepository) Rollback() error {
-	defer func() {
-		r.inTx = false
-	}()
-	if !r.inTx {
-		return ErrNotInTransaction
-	}
 	return r.db.Rollback().Error
 }
 
 func (r BaseRepository) RollbackTo(name string) error {
-	defer func() {
-		r.inTx = false
-	}()
-	if !r.inTx {
-		return ErrNotInTransaction
-	}
 	return r.db.RollbackTo(name).Error
 }
 
