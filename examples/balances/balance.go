@@ -1,0 +1,89 @@
+package balances
+
+import (
+	"database/sql"
+
+	"github.com/owenlilly/progorm"
+	"gorm.io/gorm"
+)
+
+// Balance balances table model
+type Balance struct {
+	ID    string `gorm:"primaryKey"`
+	Total int64
+}
+
+// BalanceRepository repository interface for accessing balances table
+type BalanceRepository interface {
+	Add(balanceID string, amount int64) error
+	GetBalance(balanceID string) (*Balance, error)
+	Insert(balance *Balance) error
+
+	Begin(opts ...*sql.TxOptions) (tx *gorm.DB)
+	WithTx(tx *gorm.DB) BalanceRepository
+	SavePoint(name string) error
+	Commit() error
+	Rollback() error
+	RollbackTo(name string) error
+}
+
+type balanceRepository struct {
+	progorm.BaseRepository
+}
+
+// NewBalanceRepository create a new instance of BalanceRepository
+func NewBalanceRepository(connMan progorm.ConnectionManager) BalanceRepository {
+	r := &balanceRepository{BaseRepository: progorm.NewBaseRepository(connMan)}
+
+	r.AutoMigrateOrWarn(&Balance{})
+
+	return r
+}
+
+func (r balanceRepository) Insert(balance *Balance) error {
+	return r.InsertRecord(&balance)
+}
+
+func (r balanceRepository) Add(balanceID string, amount int64) error {
+	return r.DB().
+		Model(&Balance{ID: balanceID}).
+		Update("total", gorm.Expr("total + ?", amount)).
+		Error
+}
+
+func (r balanceRepository) GetBalance(balanceID string) (*Balance, error) {
+	var bal Balance
+	err := r.DB().Model(&Balance{}).First(&bal, &Balance{ID: balanceID}).Error
+	if err != nil {
+		return nil, err
+	}
+	return &bal, nil
+}
+
+// region: Transaction section
+
+func (r *balanceRepository) Begin(opts ...*sql.TxOptions) (tx *gorm.DB) {
+	return r.BaseRepository.BeginTx(opts...).DB()
+}
+
+func (r *balanceRepository) WithTx(tx *gorm.DB) BalanceRepository {
+	return &balanceRepository{BaseRepository: r.BaseRepository.WithTx(tx)}
+}
+
+func (r *balanceRepository) SavePoint(name string) error {
+	return r.BaseRepository.SavePoint(name)
+}
+
+func (r *balanceRepository) Commit() error {
+	return r.BaseRepository.Commit()
+}
+
+func (r *balanceRepository) Rollback() error {
+	return r.BaseRepository.Rollback()
+}
+
+func (r *balanceRepository) RollbackTo(name string) error {
+	return r.BaseRepository.RollbackTo(name)
+}
+
+// endregion: Transaction section

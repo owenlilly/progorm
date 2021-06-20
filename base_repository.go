@@ -1,6 +1,8 @@
 package progorm
 
 import (
+	"database/sql"
+	"errors"
 	"log"
 	"math"
 	"regexp"
@@ -9,10 +11,15 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+var (
+	ErrNotInTransaction = errors.New("not in transaction")
+)
+
 // BaseRepository base repository type for accessing tables
 type BaseRepository struct {
 	connMan ConnectionManager
 	db      *gorm.DB
+	inTx    bool
 }
 
 // NewBaseRepository instantiate new instance of BaseRepository
@@ -31,7 +38,7 @@ func NewBaseRepository(connMan ConnectionManager) BaseRepository {
 }
 
 // InsertRecord model to insert must be a pointer/reference type
-func (r BaseRepository) InsertRecord(model interface{}) error {
+func (r BaseRepository) InsertRecord(model interface{}, tx ...*gorm.DB) error {
 	return r.db.Create(model).Error
 }
 
@@ -114,6 +121,68 @@ func (r BaseRepository) ConnectionManager() ConnectionManager {
 func (r BaseRepository) DB() *gorm.DB {
 	return r.db
 }
+
+// region: Transaction section
+
+// BeginTx start a new database transaction
+func (r BaseRepository) BeginTx(opts ...*sql.TxOptions) BaseRepository {
+	return BaseRepository{
+		connMan: r.connMan,
+		db:      r.db.Begin(opts...),
+		inTx:    true,
+	}
+}
+
+// WithTx start a new database transaction
+func (r BaseRepository) WithTx(tx *gorm.DB) BaseRepository {
+	return BaseRepository{
+		connMan: r.connMan,
+		db:      tx,
+		inTx:    true,
+	}
+}
+
+func (r *BaseRepository) SavePoint(name string) error {
+	defer func() {
+		r.inTx = false
+	}()
+	if !r.inTx {
+		return ErrNotInTransaction
+	}
+	return r.db.SavePoint(name).Error
+}
+
+func (r BaseRepository) Commit() error {
+	defer func() {
+		r.inTx = false
+	}()
+	if !r.inTx {
+		return ErrNotInTransaction
+	}
+	return r.db.Commit().Error
+}
+
+func (r BaseRepository) Rollback() error {
+	defer func() {
+		r.inTx = false
+	}()
+	if !r.inTx {
+		return ErrNotInTransaction
+	}
+	return r.db.Rollback().Error
+}
+
+func (r BaseRepository) RollbackTo(name string) error {
+	defer func() {
+		r.inTx = false
+	}()
+	if !r.inTx {
+		return ErrNotInTransaction
+	}
+	return r.db.RollbackTo(name).Error
+}
+
+// endregion: Transaction section
 
 func (r BaseRepository) calcPageCount(perPage, total uint64) uint {
 	if perPage == 0 || total == 0 {
