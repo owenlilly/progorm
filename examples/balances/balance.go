@@ -21,10 +21,8 @@ type BalanceRepository interface {
 
 	Begin(opts ...*sql.TxOptions) (tx *gorm.DB)
 	WithTx(tx *gorm.DB) BalanceRepository
-	SavePoint(name string) error
 	Commit() error
 	Rollback() error
-	RollbackTo(name string) error
 }
 
 type balanceRepository struct {
@@ -70,20 +68,12 @@ func (r *balanceRepository) WithTx(tx *gorm.DB) BalanceRepository {
 	return &balanceRepository{BaseRepository: r.BaseRepository.WithTx(tx)}
 }
 
-func (r *balanceRepository) SavePoint(name string) error {
-	return r.BaseRepository.SavePoint(name)
-}
-
 func (r *balanceRepository) Commit() error {
 	return r.BaseRepository.Commit()
 }
 
 func (r *balanceRepository) Rollback() error {
 	return r.BaseRepository.Rollback()
-}
-
-func (r *balanceRepository) RollbackTo(name string) error {
-	return r.BaseRepository.RollbackTo(name)
 }
 
 // endregion: Transaction section
