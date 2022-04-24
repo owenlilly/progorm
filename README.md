@@ -9,7 +9,7 @@ Run `go get -u github.com/owenlilly/progorm`.
 # Why Progorm
 
 - Clean typed Repository Pattern (requires Go 1.18)
-- Elegant transactions support
+- Elegant transaction support
 - Easy to use/extend
 - Exposes all Gorm's underlying features  
 
