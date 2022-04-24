@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/owenlilly/progorm"
+	"github.com/owenlilly/progorm/connection"
 	"gorm.io/gorm"
 )
 
@@ -30,7 +31,7 @@ type balanceRepository struct {
 }
 
 // NewBalanceRepository create a new instance of BalanceRepository
-func NewBalanceRepository(connMan progorm.ConnectionManager) BalanceRepository {
+func NewBalanceRepository(connMan connection.Manager) BalanceRepository {
 	r := &balanceRepository{BaseRepository: progorm.NewBaseRepository(connMan)}
 
 	r.AutoMigrateOrWarn(&Balance{})

@@ -5,19 +5,20 @@ import (
 	"math"
 	"regexp"
 
+	"github.com/owenlilly/progorm/connection"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 // BaseRepository base repository type for accessing tables
 type BaseRepository struct {
-	connMan ConnectionManager
+	connMan connection.Manager
 	db      *gorm.DB
 	inTx    bool
 }
 
 // NewBaseRepository instantiate new instance of BaseRepository
-func NewBaseRepository(connMan ConnectionManager) BaseRepository {
+func NewBaseRepository(connMan connection.Manager) BaseRepository {
 	r := BaseRepository{
 		connMan: connMan,
 	}
@@ -32,14 +33,14 @@ func NewBaseRepository(connMan ConnectionManager) BaseRepository {
 }
 
 // InsertRecord model to insert must be a pointer/reference type
-func (r BaseRepository) InsertRecord(model interface{}, tx ...*gorm.DB) error {
+func (r BaseRepository) InsertRecord(model any) error {
 	return r.db.Create(model).Error
 }
 
 // FindRecords page finding records
-func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out interface{}) (Page, error) {
+func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out any) (Page, error) {
 	if perPage > 1000 {
-		// cap at 10000 records per call
+		// cap at 1000 records per call
 		perPage = 1000
 	}
 
@@ -87,27 +88,27 @@ func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out inte
 	return results, nil
 }
 
-// Count count total number of records for the given query
-func (r BaseRepository) Count(model, query interface{}, args ...interface{}) (count int64, err error) {
+// Count counts total number of records for the given query
+func (r BaseRepository) Count(model, query any, args ...any) (count int64, err error) {
 	err = r.db.Model(model).Where(query, args...).Count(&count).Error
 
 	return
 }
 
 // AutoMigrate create tables for the given models or return an error
-func (r BaseRepository) AutoMigrate(models ...interface{}) error {
+func (r BaseRepository) AutoMigrate(models ...any) error {
 	return r.connMan.AutoMigrate(models...)
 }
 
 // AutoMigrateOrWarn create tables for the given models or print a warning message if there's an error
-func (r BaseRepository) AutoMigrateOrWarn(models ...interface{}) {
+func (r BaseRepository) AutoMigrateOrWarn(models ...any) {
 	if err := r.connMan.AutoMigrate(models...); err != nil {
 		log.Println("warning:", err.Error())
 	}
 }
 
 // ConnectionManager return the current ConnectionManager
-func (r BaseRepository) ConnectionManager() ConnectionManager {
+func (r BaseRepository) ConnectionManager() connection.Manager {
 	return r.connMan
 }
 
@@ -152,7 +153,7 @@ func (r BaseRepository) calcPageCount(perPage, total uint64) uint {
 	return uint(math.Ceil(float64(total) / float64(perPage)))
 }
 
-func (r BaseRepository) buildCountSql(db *gorm.DB) (countSql string, vars []interface{}) {
+func (r BaseRepository) buildCountSql(db *gorm.DB) (countSql string, vars []any) {
 	if orderByClause, ok := db.Statement.Clauses["ORDER BY"]; ok {
 		if _, ok := db.Statement.Clauses["GROUP BY"]; !ok {
 			delete(db.Statement.Clauses, "ORDER BY")

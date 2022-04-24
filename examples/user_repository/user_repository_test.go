@@ -6,7 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/owenlilly/progorm"
+	"github.com/owenlilly/progorm/connection"
+	sqliteconn "github.com/owenlilly/progorm/sqlite-connection"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -15,7 +16,7 @@ import (
 type SuiteUserRepository struct {
 	suite.Suite
 
-	connMan  progorm.ConnectionManager
+	connMan  connection.Manager
 	userRepo UserRepository
 
 	email string
@@ -27,7 +28,7 @@ func TestUserRepository(t *testing.T) {
 
 func (s *SuiteUserRepository) SetupSuite() {
 	// create a new SQL connection manager, there's also a postgres connection manager
-	s.connMan = progorm.NewSQLiteConnectionManager("test.db", &gorm.Config{
+	s.connMan = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
@@ -43,29 +44,44 @@ func (s *SuiteUserRepository) SetupSuite() {
 	s.email = "unit@test.com"
 }
 
-func (s *SuiteUserRepository) TearDownSuite() {
+func (s *SuiteUserRepository) TearDownTest() {
 	db, _ := s.connMan.GetConnection()
 
 	// clear all records
-	db.Delete(&User{})
+	db.Where(gorm.Expr("id IS NOT NULL")).Delete(&User{})
 }
 
-func (s SuiteUserRepository) Test0Insert() {
+func (s SuiteUserRepository) Test_Insert() {
+	user, err := s.insertUser()
+
+	s.NoError(err)
+	s.NotEmpty(user.ID)
+	s.False(user.JoinedOn.IsZero())
+}
+
+func (s SuiteUserRepository) Test_GetByEmail() {
+
+	_, err := s.insertUser()
+	if !s.NoError(err) {
+		return
+	}
+
+	user, err := s.userRepo.GetByEmail(s.email)
+
+	s.NoError(err)
+	s.NotNil(user)
+}
+
+func (s SuiteUserRepository) insertUser() (*User, error) {
 	user := &User{
 		Email:       s.email,
 		DisplayName: "Tester",
 	}
 
 	err := s.userRepo.Insert(user)
+	if err != nil {
+		return nil, err
+	}
 
-	s.NoError(err)
-	s.NotEmpty(user.ID)
-	s.NotEmpty(user.JoinedOn)
-}
-
-func (s SuiteUserRepository) Test1GetByEmail() {
-	user, err := s.userRepo.GetByEmail(s.email)
-
-	s.NoError(err)
-	s.NotNil(user)
+	return user, nil
 }

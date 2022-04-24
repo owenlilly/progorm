@@ -1,4 +1,4 @@
-package progorm
+package connection
 
 import (
 	"database/sql"
@@ -22,8 +22,8 @@ var (
 )
 
 type (
-	// ConnectionManager manages database connections
-	ConnectionManager interface {
+	// Manager manages database connections
+	Manager interface {
 		GetConnection() (*gorm.DB, error)
 		AutoMigrate(tables ...interface{}) error
 		AutoMigrateOrWarn(tables ...interface{})
@@ -31,7 +31,7 @@ type (
 		ConnString() string
 	}
 
-	// connectionManager implements ConnectionManager interface
+	// connectionManager implements Manager interface
 	connectionManager struct {
 		dialector      gorm.Dialector
 		config         *gorm.Config
@@ -42,7 +42,7 @@ type (
 	}
 )
 
-func newConnectionManager(connStr string, dialector gorm.Dialector, config *gorm.Config) ConnectionManager {
+func NewBaseConnectionManager(connStr string, dialector gorm.Dialector, config *gorm.Config) Manager {
 	connMan := &connectionManager{
 		dialector:      dialector,
 		config:         config,

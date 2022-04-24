@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/owenlilly/progorm"
+	"github.com/owenlilly/progorm/connection"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +17,7 @@ type User struct {
 	JoinedOn    time.Time
 }
 
-// BeforeCreate perform some pre-insert operation
+// BeforeCreate perform some pre-insert operation (optional)
 func (u *User) BeforeCreate(*gorm.DB) error {
 	if u.JoinedOn.IsZero() {
 		u.JoinedOn = time.Now().UTC()
@@ -32,14 +33,15 @@ type UserRepository interface {
 }
 
 type userRepository struct {
-	progorm.BaseRepository
+	progorm.BaseTypedRepository[User]
 }
 
 // NewUserRepository create a new instance of UserRepository
-func NewUserRepository(connMan progorm.ConnectionManager) UserRepository {
-	r := &userRepository{BaseRepository: progorm.NewBaseRepository(connMan)}
+func NewUserRepository(connMan connection.Manager) UserRepository {
+	r := &userRepository{BaseTypedRepository: progorm.NewBaseTypedRepository[User](connMan)}
 
-	r.AutoMigrateOrWarn(&User{})
+	// optional
+	r.AutoMigrateOrWarn(User{})
 
 	return r
 }
@@ -51,14 +53,14 @@ func (r userRepository) Insert(user *User) error {
 
 // GetByEmail get a user by email
 func (r userRepository) GetByEmail(email string) (*User, error) {
-	var user User
-	result := r.DB().First(&user, User{Email: email})
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
+	user, err := r.First(User{Email: email})
+
+	if err != nil {
+		if r.IsRecordNotFoundError(err) {
 			return nil, errors.New("user not found")
 		}
-		return nil, result.Error
+		return nil, err
 	}
 
-	return &user, nil
+	return user, nil
 }

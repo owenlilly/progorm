@@ -6,6 +6,12 @@
 
 Run `go get -u github.com/owenlilly/progorm`.
 
+# Why Progorm
+
+- Clean typed Repository Pattern (requires Go 1.18)
+- Elegant transaction support
+- Easy to use/extend
+- Exposes all Gorm's underlying features  
 
 # Usage
 
@@ -25,6 +31,7 @@ func (u *User) BeforeCreate(*gorm.DB) error {
     if u.JoinedOn.IsZero() {
         u.JoinedOn = time.Now().UTC()
     }
+	
     // do some more validations...
     return nil
 }
@@ -36,14 +43,15 @@ type UserRepository interface {
 }
 
 type userRepository struct {
-    progorm.BaseRepository
+    progorm.BaseTypedRepository[User]
 }
 
 // NewUserRepository create a new instance of UserRepository
-func NewUserRepository(connMan progorm.ConnectionManager) UserRepository {
-    r := &userRepository{BaseRepository: progorm.NewBaseRepository(connMan)}
+func NewUserRepository(connMan connection.Manager) UserRepository {
+    r := &userRepository{BaseTypedRepository: progorm.NewBaseTypedRepository[User](connMan)}
     
-    r.AutoMigrateOrWarn(&User{})
+    // optional
+    r.AutoMigrateOrWarn(User{})
     
     return r
 }
@@ -55,39 +63,19 @@ func (r userRepository) Insert(user *User) error {
 
 // GetByEmail get a user by email
 func (r userRepository) GetByEmail(email string) (*User, error) {
-    var user User
-    result := r.DB().First(&user, User{Email: email})
-    if result.Error != nil {
-        if result.Error == gorm.ErrRecordNotFound {
+    user, err := r.First(User{Email: email})
+    
+    if err != nil {
+        if r.IsRecordNotFoundError(err) {
             return nil, errors.New("user not found")
         }
-        return nil, result.Error
+        return nil, err
     }
     
-    return &user, nil
+    return user, nil
 }
 ```
 
 ---
 
 MIT License
-
-Copyright (c) 2020 Owen Lilly
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.

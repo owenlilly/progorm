@@ -1,4 +1,4 @@
-package progorm
+package pg_connection
 
 import (
 	"testing"

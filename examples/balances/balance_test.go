@@ -8,7 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/owenlilly/progorm"
+	"github.com/owenlilly/progorm/connection"
+	sqliteconn "github.com/owenlilly/progorm/sqlite-connection"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -17,7 +18,7 @@ import (
 type SuiteTransaction struct {
 	suite.Suite
 
-	connMan     progorm.ConnectionManager
+	connMan     connection.Manager
 	balanceRepo BalanceRepository
 }
 
@@ -27,7 +28,7 @@ func TestSuiteTransaction(t *testing.T) {
 
 func (s *SuiteTransaction) SetupSuite() {
 	// create a new SQL connection manager, there's also a postgres connection manager
-	s.connMan = progorm.NewSQLiteConnectionManager("test.db", &gorm.Config{
+	s.connMan = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
