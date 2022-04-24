@@ -1,4 +1,4 @@
-package progorm
+package pg_connection
 
 import (
 	"database/sql"
@@ -7,19 +7,20 @@ import (
 	"strings"
 
 	"github.com/lib/pq"
+	"github.com/owenlilly/progorm/connection"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type postgresConnectionManager struct {
-	ConnectionManager
+	connection.Manager
 }
 
-// NewPostgresConnectionManager create a new instance of the Postgres implementation of the ConnectionManager interface.
-func NewPostgresConnectionManager(connString string, config *gorm.Config) ConnectionManager {
+// NewPostgresConnectionManager create a new instance of the Postgres implementation of the Manager interface.
+func NewPostgresConnectionManager(connString string, config *gorm.Config) connection.Manager {
 	dialector := postgres.Open(connString)
 	connMan := &postgresConnectionManager{
-		ConnectionManager: newConnectionManager(connString, dialector, config),
+		Manager: connection.NewBaseConnectionManager(connString, dialector, config),
 	}
 
 	return connMan
@@ -53,8 +54,8 @@ func MakePostgresConnString(user, pass, host, dbName, sslMode string, defaultsDB
 	return connStr
 }
 
-// PGCreateDbIfNotExists create postgres database of the given name if one doesn't already exists. No actions are performed if the database already exists.
-func PGCreateDbIfNotExists(connString string, defaultDBs ...string) error {
+// CreateDbIfNotExists create postgres database of the given name if one doesn't already exists. No actions are performed if the database already exists.
+func CreateDbIfNotExists(connString string, defaultDBs ...string) error {
 	var defaultDB = "postgres"
 	if defaultDBs != nil && len(defaultDBs) > 0 {
 		defaultDB = defaultDBs[0]
@@ -63,7 +64,7 @@ func PGCreateDbIfNotExists(connString string, defaultDBs ...string) error {
 	re := regexp.MustCompile(`(?m)postgres://.+:?\d?/(\w+)`)
 	matches := re.FindStringSubmatch(connString)
 	if len(matches) != 2 {
-		return ErrInvalidConnectionString
+		return connection.ErrInvalidConnectionString
 	}
 	dbName := matches[1]
 	if dbName == defaultDB {

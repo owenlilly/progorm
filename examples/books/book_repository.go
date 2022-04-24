@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/owenlilly/progorm"
+	"github.com/owenlilly/progorm/connection"
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -37,7 +38,7 @@ type bookRepository struct {
 }
 
 // NewBookRepository create a new instance of BookRepository
-func NewBookRepository(connMan progorm.ConnectionManager) BookRepository {
+func NewBookRepository(connMan connection.Manager) BookRepository {
 	repo := bookRepository{
 		BaseRepository: progorm.NewBaseRepository(connMan),
 	}
