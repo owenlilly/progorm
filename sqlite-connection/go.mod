@@ -8,8 +8,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	gorm.io/driver/sqlite v1.3.2 // indirect
 	gorm.io/gorm v1.23.4 // indirect
-	github.com/owenlilly/progorm/connection v0.0.0-unpublished
+	github.com/owenlilly/progorm/connection v0.2.0
 )
-
-replace github.com/owenlilly/progorm/connection v0.0.0-unpublished => ../connection
 

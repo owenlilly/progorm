@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/lib/pq v1.10.5
-	github.com/owenlilly/progorm/connection v0.0.0-unpublished
+	github.com/owenlilly/progorm/connection v0.2.0
 	gorm.io/driver/postgres v1.3.5
 	gorm.io/gorm v1.23.4
 )
@@ -23,5 +23,3 @@ require (
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
-
-replace github.com/owenlilly/progorm/connection v0.0.0-unpublished => ../connection
