@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/owenlilly/progorm/connection"
-	sqliteconn "github.com/owenlilly/progorm/sqlite-connection"
+	"github.com/owenlilly/progorm-connection/connection"
+	sqliteconn "github.com/owenlilly/progorm-sqlite-connection/sqliteconnection"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"

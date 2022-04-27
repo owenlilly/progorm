@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/owenlilly/progorm/connection"
-	sqliteconn "github.com/owenlilly/progorm/sqlite-connection"
+	"github.com/owenlilly/progorm-connection/connection"
+	sqliteconn "github.com/owenlilly/progorm-sqlite-connection/sqliteconnection"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -84,7 +84,7 @@ func (s SuiteTransaction) TestGivenBalanceExists_WhenAddAndRollback_VerifyRolled
 		s.Empty(nonTxBal.Total)
 	}
 
-	// fetching updated balance inside of the transaction returns the updated state
+	// fetching updated balance inside the transaction returns the updated state
 	txBal, err := txRepo.GetBalance(balance.ID)
 	if s.NoError(err) {
 		s.NotEmpty(txBal)

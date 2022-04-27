@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/owenlilly/progorm"
-	"github.com/owenlilly/progorm/connection"
+	"github.com/owenlilly/progorm-connection/connection"
 	"gorm.io/gorm"
 )
 
