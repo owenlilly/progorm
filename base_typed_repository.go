@@ -1,7 +1,7 @@
 package progorm
 
 import (
-	"github.com/owenlilly/progorm/connection"
+	"github.com/owenlilly/progorm-connection/connection"
 	"gorm.io/gorm"
 )
 

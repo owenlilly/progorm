@@ -5,7 +5,7 @@ import (
 	"math"
 	"regexp"
 
-	"github.com/owenlilly/progorm/connection"
+	"github.com/owenlilly/progorm-connection/connection"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )

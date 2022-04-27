@@ -2,7 +2,10 @@ github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.4 h1:tHnRBy1i5F2Dh8BAFxqFzxKqqvezXrL2OW1TnX+Mlas=
 github.com/jinzhu/now v1.1.4/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=
+github.com/owenlilly/progorm-connection v0.2.1 h1:LqUim7Pbrv0ck6o6fWZHNhf0nBIH/fAmvDraGOD7nB0=
+github.com/owenlilly/progorm-connection v0.2.1/go.mod h1:GUoh593ySmVTKgE0PLlD+2YfIgYAZfSvUdEZq1YeTrc=
 github.com/owenlilly/progorm/connection v0.0.0-20220424195804-077f9e0d79c2 h1:np4hDIili5ksbalcZ4P5JPuqItl0M4v43O62MBNHuVU=
 github.com/owenlilly/progorm/connection v0.0.0-20220424195804-077f9e0d79c2/go.mod h1:/T68UcB9AkILHcU8zBBkrJwhRdCA7MN59dR5zdIw3nw=
 gorm.io/gorm v1.23.4 h1:1BKWM67O6CflSLcwGQR7ccfmC4ebOxQrTfOQGRE9wjg=
 gorm.io/gorm v1.23.4/go.mod h1:l2lP/RyAtc1ynaTjFksBde/O8v9oOGIApu2/xRitmZk=
+gorm.io/gorm v1.23.5/go.mod h1:l2lP/RyAtc1ynaTjFksBde/O8v9oOGIApu2/xRitmZk=
