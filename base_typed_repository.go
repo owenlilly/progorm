@@ -1,6 +1,8 @@
 package progorm
 
 import (
+	"database/sql"
+
 	"github.com/owenlilly/progorm-connection/connection"
 	"gorm.io/gorm"
 )
@@ -88,7 +90,11 @@ func (r BaseTypedRepository[T]) DB() *gorm.DB {
 
 // region: Transaction section
 
-// WithTx start a new database transaction
+// Begin start a new database transaction
+func (r *BaseTypedRepository[T]) Begin(opts ...*sql.TxOptions) (tx *gorm.DB) {
+	return r.DB().Begin(opts...)
+}
+
 func (r BaseTypedRepository[T]) WithTx(tx *gorm.DB) BaseTypedRepository[T] {
 	return BaseTypedRepository[T]{
 		baseRepo: r.baseRepo.WithTx(tx),

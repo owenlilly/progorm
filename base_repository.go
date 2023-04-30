@@ -1,6 +1,7 @@
 package progorm
 
 import (
+	"database/sql"
 	"log"
 	"math"
 	"regexp"
@@ -120,6 +121,10 @@ func (r BaseRepository) DB() *gorm.DB {
 // region: Transaction section
 
 // WithTx start a new database transaction
+func (r *BaseRepository) Begin(opts ...*sql.TxOptions) (tx *gorm.DB) {
+	return r.DB().Begin(opts...)
+}
+
 func (r BaseRepository) WithTx(tx *gorm.DB) BaseRepository {
 	return BaseRepository{
 		connMan: r.connMan,
