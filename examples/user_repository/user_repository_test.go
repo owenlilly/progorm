@@ -51,7 +51,7 @@ func (s *SuiteUserRepository) TearDownTest() {
 	db.Where(gorm.Expr("id IS NOT NULL")).Delete(&User{})
 }
 
-func (s SuiteUserRepository) Test_Insert() {
+func (s *SuiteUserRepository) Test_Insert() {
 	user, err := s.insertUser()
 
 	s.NoError(err)
@@ -59,7 +59,7 @@ func (s SuiteUserRepository) Test_Insert() {
 	s.False(user.JoinedOn.IsZero())
 }
 
-func (s SuiteUserRepository) Test_GetByEmail() {
+func (s *SuiteUserRepository) Test_GetByEmail() {
 
 	_, err := s.insertUser()
 	if !s.NoError(err) {
@@ -72,7 +72,7 @@ func (s SuiteUserRepository) Test_GetByEmail() {
 	s.NotNil(user)
 }
 
-func (s SuiteUserRepository) insertUser() (*User, error) {
+func (s *SuiteUserRepository) insertUser() (*User, error) {
 	user := &User{
 		Email:       s.email,
 		DisplayName: "Tester",

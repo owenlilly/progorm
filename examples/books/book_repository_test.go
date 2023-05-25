@@ -27,7 +27,7 @@ func TestUserRepository(t *testing.T) {
 
 func (s *SuiteBookRepository) SetupSuite() {
 	// create a new SQL connection manager, there's also a postgres connection manager
-	s.connMan, _ = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
+	s.connMan = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
@@ -48,7 +48,7 @@ func (s *SuiteBookRepository) TearDownSuite() {
 	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&Book{})
 }
 
-func (s SuiteBookRepository) TestInsert() {
+func (s *SuiteBookRepository) TestInsert() {
 	now := time.Now().UTC()
 	id1, err := s.repo.Insert(Book{
 		Title:       "Game Of Thrones",
@@ -67,7 +67,7 @@ func (s SuiteBookRepository) TestInsert() {
 	s.NoError(err)
 }
 
-func (s SuiteBookRepository) TestFindAll() {
+func (s *SuiteBookRepository) TestFindAll() {
 	s.givenBooksExist()
 
 	page, err := s.repo.FindAll(1, 10)
@@ -81,7 +81,7 @@ func (s SuiteBookRepository) TestFindAll() {
 	s.EqualValues("Game Of Thrones", page.Books[1].Title)
 }
 
-func (s SuiteBookRepository) givenBooksExist() {
+func (s *SuiteBookRepository) givenBooksExist() {
 	now := time.Now().UTC()
 	id1, err := s.repo.Insert(Book{
 		Author:      "George RR Martin",

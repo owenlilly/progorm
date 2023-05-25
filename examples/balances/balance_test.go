@@ -49,7 +49,7 @@ func (s *SuiteTransaction) TearDownSuite() {
 	db.Exec("DELETE FROM balances")
 }
 
-func (s SuiteTransaction) TestGivenBalanceExists_WhenAddAndCommit_VerifyComitted() {
+func (s *SuiteTransaction) TestGivenBalanceExists_WhenAddAndCommit_VerifyComitted() {
 	var balance = s.givenBalanceExists()
 
 	// begin a transaction
@@ -68,7 +68,7 @@ func (s SuiteTransaction) TestGivenBalanceExists_WhenAddAndCommit_VerifyComitted
 	}
 }
 
-func (s SuiteTransaction) TestGivenBalanceExists_WhenAddAndRollback_VerifyRolledBack() {
+func (s *SuiteTransaction) TestGivenBalanceExists_WhenAddAndRollback_VerifyRolledBack() {
 	var balance = s.givenBalanceExists()
 
 	// begin a transaction
@@ -102,7 +102,7 @@ func (s SuiteTransaction) TestGivenBalanceExists_WhenAddAndRollback_VerifyRolled
 	}
 }
 
-func (s SuiteTransaction) givenBalanceExists() Balance {
+func (s *SuiteTransaction) givenBalanceExists() Balance {
 	var balance = Balance{
 		ID:    pseudoUUID(),
 		Total: 0,
