@@ -27,8 +27,9 @@ func TestSuiteTransaction(t *testing.T) {
 }
 
 func (s *SuiteTransaction) SetupSuite() {
+	var err error
 	// create a new SQL connection manager, there's also a postgres connection manager
-	s.connMan = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
+	s.connMan, err = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
@@ -38,6 +39,8 @@ func (s *SuiteTransaction) SetupSuite() {
 			},
 		),
 	})
+
+	s.NoError(err)
 
 	s.balanceRepo = NewBalanceRepository(s.connMan)
 }

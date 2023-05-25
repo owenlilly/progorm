@@ -26,8 +26,9 @@ func TestUserRepository(t *testing.T) {
 }
 
 func (s *SuiteBookRepository) SetupSuite() {
+	var err error
 	// create a new SQL connection manager, there's also a postgres connection manager
-	s.connMan = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
+	s.connMan, err = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
@@ -37,6 +38,8 @@ func (s *SuiteBookRepository) SetupSuite() {
 			},
 		),
 	})
+
+	s.NoError(err)
 
 	s.repo = NewBookRepository(s.connMan)
 }
