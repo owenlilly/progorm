@@ -14,6 +14,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+const testDbName = "test.db"
+
 type SuiteBookRepository struct {
 	suite.Suite
 
@@ -26,8 +28,9 @@ func TestUserRepository(t *testing.T) {
 }
 
 func (s *SuiteBookRepository) SetupSuite() {
+	var err error
 	// create a new SQL connection manager, there's also a postgres connection manager
-	s.connMan = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
+	s.connMan, err = sqliteconn.NewConnectionManager(testDbName, &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
@@ -38,17 +41,16 @@ func (s *SuiteBookRepository) SetupSuite() {
 		),
 	})
 
+	s.NoError(err)
+
 	s.repo = NewBookRepository(s.connMan)
 }
 
 func (s *SuiteBookRepository) TearDownSuite() {
-	db, _ := s.connMan.GetConnection()
-
-	// clear all records
-	db.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&Book{})
+	_ = os.Remove(testDbName)
 }
 
-func (s SuiteBookRepository) TestInsert() {
+func (s *SuiteBookRepository) TestInsert() {
 	now := time.Now().UTC()
 	id1, err := s.repo.Insert(Book{
 		Title:       "Game Of Thrones",
@@ -67,36 +69,44 @@ func (s SuiteBookRepository) TestInsert() {
 	s.NoError(err)
 }
 
-func (s SuiteBookRepository) TestFindAll() {
-	s.givenBooksExist()
+func (s *SuiteBookRepository) TestFindAll() {
+	books := s.givenBooksExist()
 
-	page, err := s.repo.FindAll(1, 10)
-	s.NoError(err)
-	s.EqualValues(1, page.Pages)
-	s.EqualValues(10, page.PerPage)
-	s.EqualValues(1, page.Page)
-	s.EqualValues(2, page.Total)
-	s.EqualValues(2, len(page.Books))
-	s.EqualValues("Beowulf", page.Books[0].Title)
-	s.EqualValues("Game Of Thrones", page.Books[1].Title)
+	for i, book := range books {
+		page, err := s.repo.FindAll(uint(i), 1)
+		if s.NoError(err) {
+			s.EqualValues(2, page.Pages)
+			s.EqualValues(1, page.PerPage)
+			s.EqualValues(i, page.Page)
+			s.EqualValues(2, page.Total)
+			s.EqualValues(1, len(page.Books))
+			s.EqualValues(book.Title, page.Books[0].Title)
+		}
+	}
 }
 
-func (s SuiteBookRepository) givenBooksExist() {
+func (s *SuiteBookRepository) givenBooksExist() []Book {
 	now := time.Now().UTC()
-	id1, err := s.repo.Insert(Book{
+	book1 := Book{
 		Author:      "George RR Martin",
 		Title:       "Game Of Thrones",
 		ReleaseDate: &now,
 		ISBN:        null.StringFrom("978-3-18-148410-0"),
-	})
+	}
+	id1, err := s.repo.Insert(book1)
 	s.NotEqual(0, id1)
 	s.NoError(err)
+	book1.ID = id1
 
-	id2, err := s.repo.Insert(Book{
+	book2 := Book{
 		Author:      "Unknown",
 		Title:       "Beowulf",
 		ReleaseDate: &now,
-	})
+	}
+	id2, err := s.repo.Insert(book2)
 	s.NotEqual(0, id2)
 	s.NoError(err)
+	book2.ID = id2
+
+	return []Book{book1, book2}
 }
