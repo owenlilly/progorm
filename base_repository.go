@@ -45,11 +45,6 @@ func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out any)
 		perPage = 1000
 	}
 
-	if page == 0 {
-		// 1 based page index
-		page = 1
-	}
-
 	results := Page{
 		PerPage: perPage,
 		Page:    page,
@@ -70,7 +65,7 @@ func (r BaseRepository) FindRecords(page, perPage uint, query *gorm.DB, out any)
 	}
 
 	queryStmt := session.
-		Offset(int(page - 1*perPage)).
+		Offset(int(page * perPage)).
 		Limit(int(perPage)).
 		Find(nil).Statement
 
