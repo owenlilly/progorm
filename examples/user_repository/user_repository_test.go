@@ -13,6 +13,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+const testDbName = "test.db"
+
 type SuiteUserRepository struct {
 	suite.Suite
 
@@ -29,7 +31,7 @@ func TestUserRepository(t *testing.T) {
 func (s *SuiteUserRepository) SetupSuite() {
 	var err error
 	// create a new SQL connection manager, there's also a postgres connection manager
-	s.connMan, err = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
+	s.connMan, err = sqliteconn.NewConnectionManager(testDbName, &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
@@ -46,11 +48,8 @@ func (s *SuiteUserRepository) SetupSuite() {
 	s.email = "unit@test.com"
 }
 
-func (s *SuiteUserRepository) TearDownTest() {
-	db, _ := s.connMan.GetConnection()
-
-	// clear all records
-	db.Where(gorm.Expr("id IS NOT NULL")).Delete(&User{})
+func (s *SuiteUserRepository) TearDownSuite() {
+	_ = os.Remove(testDbName)
 }
 
 func (s *SuiteUserRepository) Test_Insert() {

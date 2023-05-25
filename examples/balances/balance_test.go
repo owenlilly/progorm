@@ -15,6 +15,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+const testDbName = "test.db"
+
 type SuiteTransaction struct {
 	suite.Suite
 
@@ -29,7 +31,7 @@ func TestSuiteTransaction(t *testing.T) {
 func (s *SuiteTransaction) SetupSuite() {
 	var err error
 	// create a new SQL connection manager, there's also a postgres connection manager
-	s.connMan, err = sqliteconn.NewConnectionManager("test.db", &gorm.Config{
+	s.connMan, err = sqliteconn.NewConnectionManager(testDbName, &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
@@ -46,10 +48,7 @@ func (s *SuiteTransaction) SetupSuite() {
 }
 
 func (s *SuiteTransaction) TearDownSuite() {
-	db, _ := s.connMan.GetConnection()
-
-	// clear all records
-	db.Exec("DELETE FROM balances")
+	_ = os.Remove(testDbName)
 }
 
 func (s *SuiteTransaction) TestGivenBalanceExists_WhenAddAndCommit_VerifyComitted() {

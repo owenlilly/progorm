@@ -64,7 +64,7 @@ func (r bookRepository) FindAll(page, perPage uint) (Paged, error) {
 
 	query := r.DB().
 		Model(Book{}).
-		Order("title ASC")
+		Order("id ASC")
 
 	pageInfo, err := r.FindRecords(page, perPage, query, &result.Books)
 	if err != nil {
